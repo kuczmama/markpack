@@ -4,7 +4,7 @@ function m(nodeName, attributes, ...args) {
         nodeName,
         attributes,
         children
-    };
+    }
 }function render(vnode) {
     if (vnode.split) return document.createTextNode(vnode);
     let n = document.createElement(vnode.nodeName);
@@ -35,13 +35,19 @@ function m(nodeName, attributes, ...args) {
     request.send();
 }function app() {
     return m('div', {},
-        "You did it!!",
+        "This works really well!!!",
+        m('img', {
+        src: 'https://previews.123rf.com/images/alexgorka/alexgorka1809/alexgorka180900030/108027925-yay-vector-lettering-.jpg',
+            width: '500px',
+            height: '400px',
+        }),
         m('img', {
             src: 'https://previews.123rf.com/images/alexgorka/alexgorka1809/alexgorka180900030/108027925-yay-vector-lettering-.jpg',
             width: '500px',
+            height: '400px',
         })
     );
-}var tid = setInterval(function() {
+};var tid = setInterval(function() {
     if (document.readyState !== 'complete') return;
     clearInterval(tid);
     renderAt(app(), "app");

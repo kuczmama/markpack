@@ -6,7 +6,7 @@ function m(nodeName, attributes, ...args) {
         nodeName,
         attributes,
         children
-    };
+    }
 }
 
 function render(vnode) {
