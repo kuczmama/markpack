@@ -1,0 +1,25 @@
+{
+  "name": "markpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bundler.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuczmama/markpack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kuczmama/markpack/issues"
+  },
+  "homepage": "https://github.com/kuczmama/markpack#readme",
+  "dependencies": {
+    "@babel/parser": "^7.4.5"
+  }
+}
