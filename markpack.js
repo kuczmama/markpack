@@ -3,7 +3,7 @@ const path = require("path");
 
 var args = process.argv.slice(2);
 
-let ENTRY_PATH = "src/entry.js";
+let ENTRY_PATH = "src/root.js";
 let OUTPUT_PATH = "bundle/bundle.js";
 let CONFIG = "";
 let MODE = "development";
@@ -42,14 +42,6 @@ for (let i = 0; i < args.length; i++) {
 
 }
 
-// const ENTRY =
-
-// make options for
-
-// entry, output, watch mode, production, development, better imports... don't load the whole file
-
-console.log(process.argv);
-
 const exportsDeclarations = {
     ExportDefaultDeclaration: true,
     DeclareExportDeclaration: true,
@@ -59,21 +51,25 @@ const exportsDeclarations = {
 
 function createAsset(filename) {
     const dependencies = [];
-    const content = fs.readFileSync(filename, 'utf-8');
+    let content = "";
+    try {
+        content = fs.readFileSync(filename, 'utf-8');
+    } catch (err) {
+        console.log("caught error reading " + filename);
+        console.log(err);
+    }
 
+    console.log(filename);
     const ast = require("@babel/parser").parse(content, {
         sourceType: "module",
     });
     let code = "";
     ast.program.body.map((node) => {
         if (node.type === "ImportDeclaration") {
-            // "ImportSpecifier"
-            console.log(JSON.stringify(node));
-            // console.log();
             dependencies.push(node.source.value)
         } else if (exportsDeclarations[node.type]) {
             // skip
-            console.log(JSON.stringify(node));
+            // console.log(JSON.stringify(node));
         } else {
             code += content.slice(node.start, node.end);
         }
@@ -91,6 +87,10 @@ function bundle(entry) {
     const initialAsset = createAsset(entry);
     const assets = [initialAsset];
     let result = initialAsset.code;
+    const loadedDependencies = {};
+    loadedDependencies[initialAsset.filename] = true;
+
+
     for (const asset of assets) {
         const dirname = path.dirname(asset.filename);
 
@@ -98,10 +98,13 @@ function bundle(entry) {
             const extname = path.extname(asset.filename);
             const absolutePath = path.join(dirname, relativePath + extname);
             const childAsset = createAsset(absolutePath);
-            childAsset.filename = relativePath + extname;
+            if (!loadedDependencies[childAsset.filename]) {
+                childAsset.filename = relativePath + extname;
 
-            result = childAsset.code + result;
-            assets.push(childAsset);
+                result = childAsset.code + "\n" + result;
+                assets.push(childAsset);
+                loadedDependencies[childAsset.filename] = true;
+            }
         });
     }
 
@@ -124,7 +127,6 @@ function createBundle() {
     }
 
     fs.appendFile(OUTPUT_PATH, bundle(ENTRY_PATH), err => {
-        if (err) throw err;
         console.log(`${OUTPUT_PATH} created`);
     });
 }
@@ -133,7 +135,9 @@ createBundle();
 
 console.log("Watching for file changes...");
 
-fs.watch('src', function(event, filename) {
+fs.watch('src', {
+    recursive: true
+}, function(event, filename) {
     if (filename) {
         console.log("File changed... Regenerating bundle")
         createBundle();
