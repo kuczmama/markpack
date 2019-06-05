@@ -64,8 +64,26 @@ function getNodeName(node) {
     throw new Error(`Unable to get node name ${JSON.stringify(node, null, 2)}`);
 }
 
+// interface FunctionDeclaration <: Function, Declaration {
+//     type: "FunctionDeclaration";
+//     id: Identifier;
+// }
+// interface VariableDeclaration <: Declaration {
+//     type: "VariableDeclaration";
+//     declarations: [VariableDeclarator];
+//     kind: "var" | "let" | "const";
+// }
+// interface VariableDeclarator <: Node {
+//     type: "VariableDeclarator";
+//     id: Pattern;
+//     init: Expression | null;
+// }
+
 function getUsedFunctions(root) {
-    console.log(root.type);
+    // console.log(root.type);
+    if (root.type === "FunctionDeclaration" || root.type === "VariableDeclaration" || root.type === "VariableDeclarator") {
+        console.log(root.id);
+    }
     if (root.body) {
         for (let i = 0; i < root.body.length; i++) {
             getUsedFunctions(root.body[i]);

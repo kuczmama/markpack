@@ -56,6 +56,10 @@ function sequence(first, next) {
         effects: [first, next]
     };
 }
+const initialState = {
+    welcomeMessage: "Welcome to Mark Act!! This is really cool fjlksdfjlkfsd",
+    count: 0,
+}
 function renderAt(vnode, id) {
     let app = document.getElementById(id);
     if (app.firstChild) app.removeChild(app.firstChild);
@@ -133,6 +137,7 @@ const reduceCounter = (state, action) => {
 };
 
 ;
+
 
 
 ;

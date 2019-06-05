@@ -4,6 +4,7 @@ import {getCoreServices} from "./core/services/services";
 import {reduceInitialLoading} from "./reducers/initial-loading-reducer";
 import {RootPage} from "./views/root-page";
 import {renderAt} from "./core/markact";
+import {initialState} from "./state";
 
 window.MarkactRoot = function(id) {
     self = this;
