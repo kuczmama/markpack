@@ -11,28 +11,28 @@ let MODE = "development";
 for (let i = 0; i < args.length; i++) {
     let arg = args[i];
     if (/--config/.test(arg)) {
-        if (arg.indexOf("=") != -1) {
+        if (arg.indexOf("=") !== -1) {
             let splitted = arg.split("=");
             CONFIG = splitted[1];
         } else {
             CONFIG = args[i + 1];
         }
     } else if (/--mode/.test(arg)) {
-        if (arg.indexOf("=") != -1) {
+        if (arg.indexOf("=") !== -1) {
             let splitted = arg.split("=");
             MODE = splitted[1];
         } else {
             MODE = args[i + 1];
         }
     } else if (/--entry-path/.test(arg)) {
-        if (arg.indexOf("=") != -1) {
+        if (arg.indexOf("=") !== -1) {
             let splitted = arg.split("=");
             ENTRY_PATH = splitted[1];
         } else {
             ENTRY_PATH = args[i + 1];
         }
     } else if (/--output-path/.test(arg)) {
-        if (arg.indexOf("=") != -1) {
+        if (arg.indexOf("=") !== -1) {
             let splitted = arg.split("=");
             OUTPUT_PATH = splitted[1];
         } else {
@@ -42,19 +42,19 @@ for (let i = 0; i < args.length; i++) {
 
 }
 
-function getNodeName(node, result) {
+function getNodeName(node) {
     if (node && node.id && node.id.type === "Identifier" && !!node.id.name) {
         // console.log("Found name!!", node.id.name);
         return node.id.name;
     } else {
         if (node.id) {
-            return getNodeName(node.id, result);
+            return getNodeName(node.id);
         } else if (node.declaration) {
-            return getNodeName(node.declaration, result);
+            return getNodeName(node.declaration);
         } else if (node.declarations) {
             let result = null;
             for (let i = 0; i < node.declarations.length; i++) {
-                result = getNodeName(node.declarations[i], result);
+                result = getNodeName(node.declarations[i]);
             }
             return result;
         } else {
@@ -64,18 +64,37 @@ function getNodeName(node, result) {
     throw new Error(`Unable to get node name ${JSON.stringify(node, null, 2)}`);
 }
 
+function getUsedFunctions(root) {
+    console.log(root.type);
+    if (root.body) {
+        for (let i = 0; i < root.body.length; i++) {
+            getUsedFunctions(root.body[i]);
+        }
+    } else if (root.declaration) {
+        getUsedFunctions(root.declaration);
+    } else if (root.declarations) {
+        for (let i = 0; i < root.declarations.length; i++) {
+            getUsedFunctions(root.declarations[i]);
+        }
+    } else {
+        return;
+    }
+}
+
 
 const exportsDeclarations = {
     ExportDefaultDeclaration: true,
     DeclareExportDeclaration: true,
     DeclareExportAllDeclaration: true,
     ExportNamedDeclaration: true,
-}
+};
 
 function createAsset(filename) {
     const dependencies = [];
     const namedExports = {}; // name => code
     const namedImports = {}; // name => boolean
+    const usedFunctions = {};
+    const usedVariables = {};
 
     let content = "";
     try {
@@ -90,7 +109,10 @@ function createAsset(filename) {
         sourceType: "module",
     });
     let code = "";
+    getUsedFunctions(ast.program);
     ast.program.body.map((node) => {
+
+        //CallExpression
         if (node.type === "ImportDeclaration") {
             if (node.specifiers && node.specifiers.length > 0) {
                 node.specifiers.map((specifier) => {
@@ -107,12 +129,11 @@ function createAsset(filename) {
 
                 namedExports[name] = code;
             }
-            // skip
-            // console.log(JSON.stringify(node));
         } else {
             code += content.slice(node.start, node.end);
         }
-    })
+    });
+
 
     // console.log("namedImports", namedImports);
     // console.log("namedExports", namedExports)
@@ -148,7 +169,8 @@ function bundle(entry) {
             const extname = path.extname(asset.filename);
             const absolutePath = path.join(dirname, relativePath + extname);
             const childAsset = createAsset(absolutePath);
-            namedExports = {...namedExports,
+            namedExports = {
+                ...namedExports,
                 ...childAsset.namedExports
             };
 
@@ -203,7 +225,7 @@ console.log("Watching for file changes...");
 
 fs.watch('src', {
     recursive: true
-}, function(event, filename) {
+}, function (event, filename) {
     if (filename) {
         console.log("File changed... Regenerating bundle")
         createBundle();
