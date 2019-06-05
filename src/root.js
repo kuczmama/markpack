@@ -18,31 +18,30 @@ import {
 import {
     initialState
 } from "./state";
+import {
+    reduceCounter
+} from "./reducers/counter-reducer";
 
-let self = null;
-class MarkactRoot {
-    constructor(id) {
-        self = this;
-        self.id = id;
-        self.state = {...initialState
-        };
-        self.services = getCoreServices(self.dispatch);
-        self.dispatch("init");
-    }
+const MarkactRoot = function(id) {
+    self = this;
+    self.id = id;
+    self.state = {...initialState
+    };
+    self.services = getCoreServices(self.dispatch);
 
 
-    reduce(state, action) {
+    self.reduce = function(state, action) {
         return reducerChain(state, action)
             .apply(reduceInitialLoading)
             .apply(reduceCounter)
             .result();
     };
 
-    reduceEffects(effects) {
+    self.reduceEffects = function(effects) {
         effects.map(effect => self.services.map(service => service(effect)))
     };
 
-    dispatch(action) {
+    self.dispatch = function(action) {
         console.log("action", action);
 
         console.log("self", self);
@@ -59,9 +58,10 @@ class MarkactRoot {
         self.render();
     };
 
-    render() {
+    self.render = function() {
         let RootPageContent = RootPage(self.dispatch);
         renderAt(RootPageContent({...self.state
         }), self.id);
     }
+    self.dispatch("init");
 }

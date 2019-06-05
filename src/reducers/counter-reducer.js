@@ -1,16 +1,16 @@
-function add() {
+export function add() {
     return {
         type: "add"
     }
 }
 
-function subtract() {
+export function subtract() {
     return {
         type: "subtract"
     }
 }
 
-let reduceCounter = (state, action) => {
+export const reduceCounter = (state, action) => {
     let effect = null;
     switch (action.type) {
         case "add":

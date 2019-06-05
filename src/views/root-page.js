@@ -9,7 +9,7 @@ import {
 } from "../src/reducers/counter-reducer";
 
 
-function RootPage(dispatch) {
+export function RootPage(dispatch) {
     return (state) => {
         return m('div', {}, state.welcomeMessage,
             m('div', {}, String(state.count),

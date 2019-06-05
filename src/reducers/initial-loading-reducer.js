@@ -1,4 +1,4 @@
-const reduceInitialLoading = (state, action) => {
+export const reduceInitialLoading = (state, action) => {
     let effect = null;
     return {
         state: state,

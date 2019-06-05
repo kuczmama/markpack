@@ -1,20 +1,8 @@
-function sequence(first, next) {
-    if (!first) return next;
-    if (!next) return first;
+import {
+    sequence
+} from "../src/core/services/sequence-service";
 
-    if (first.effectType === "sequenced") {
-        return {...first,
-            effects: first.effects.concat([next])
-        };
-    }
-    return {
-        effectType: 'sequenced',
-        effects: [first, next]
-    };
-}
-
-
-function reducerChain(state, action, effect) {
+export function reducerChain(state, action, effect) {
     const chainer = {
         apply: (reducer) => {
             let reduction = reducer(state, action);

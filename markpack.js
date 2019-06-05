@@ -42,6 +42,29 @@ for (let i = 0; i < args.length; i++) {
 
 }
 
+function getNodeName(node, result) {
+    if (node && node.id && node.id.type === "Identifier" && !!node.id.name) {
+        // console.log("Found name!!", node.id.name);
+        return node.id.name;
+    } else {
+        if (node.id) {
+            return getNodeName(node.id, result);
+        } else if (node.declaration) {
+            return getNodeName(node.declaration, result);
+        } else if (node.declarations) {
+            let result = null;
+            for (let i = 0; i < node.declarations.length; i++) {
+                result = getNodeName(node.declarations[i], result);
+            }
+            return result;
+        } else {
+            throw new Error(`Unable to get node name ${JSON.stringify(node, null, 2)}`);
+        }
+    }
+    throw new Error(`Unable to get node name ${JSON.stringify(node, null, 2)}`);
+}
+
+
 const exportsDeclarations = {
     ExportDefaultDeclaration: true,
     DeclareExportDeclaration: true,
@@ -51,6 +74,9 @@ const exportsDeclarations = {
 
 function createAsset(filename) {
     const dependencies = [];
+    const namedExports = {}; // name => code
+    const namedImports = {}; // name => boolean
+
     let content = "";
     try {
         content = fs.readFileSync(filename, 'utf-8');
@@ -66,8 +92,21 @@ function createAsset(filename) {
     let code = "";
     ast.program.body.map((node) => {
         if (node.type === "ImportDeclaration") {
-            dependencies.push(node.source.value)
+            if (node.specifiers && node.specifiers.length > 0) {
+                node.specifiers.map((specifier) => {
+                    let name = specifier.imported.name;
+                    namedImports[name] = true;
+                })
+            }
+            dependencies.push(node.source.value);
         } else if (exportsDeclarations[node.type]) {
+            if (node.type === "ExportNamedDeclaration") {
+                let declaration = node.declaration;
+                let code = content.slice(declaration.start, declaration.end);
+                let name = getNodeName(node);
+
+                namedExports[name] = code;
+            }
             // skip
             // console.log(JSON.stringify(node));
         } else {
@@ -75,10 +114,14 @@ function createAsset(filename) {
         }
     })
 
+    // console.log("namedImports", namedImports);
+    // console.log("namedExports", namedExports)
     return {
         filename,
         dependencies,
-        code
+        code,
+        namedExports,
+        namedImports
     }
 
 }
@@ -86,8 +129,15 @@ function createAsset(filename) {
 function bundle(entry) {
     const initialAsset = createAsset(entry);
     const assets = [initialAsset];
-    let result = initialAsset.code;
+    let result = initialAsset.code + "\n";
     const loadedDependencies = {};
+    const importsToLoad = {};
+    for (let namedImport in initialAsset.namedImports) {
+        importsToLoad[namedImport] = initialAsset;
+    }
+
+    let namedExports = {};
+
     loadedDependencies[initialAsset.filename] = true;
 
 
@@ -98,6 +148,15 @@ function bundle(entry) {
             const extname = path.extname(asset.filename);
             const absolutePath = path.join(dirname, relativePath + extname);
             const childAsset = createAsset(absolutePath);
+            namedExports = {...namedExports,
+                ...childAsset.namedExports
+            };
+
+            for (let namedImport in childAsset.namedImports) {
+                importsToLoad[namedImport] = childAsset;
+            }
+
+
             if (!loadedDependencies[childAsset.filename]) {
                 childAsset.filename = relativePath + extname;
 
@@ -106,6 +165,13 @@ function bundle(entry) {
                 loadedDependencies[childAsset.filename] = true;
             }
         });
+    }
+    for (let name in importsToLoad) {
+        if (namedExports[name]) {
+            result = namedExports[name] + "\n" + result;
+        } else {
+            throw new Error(`Unable to import '${name}' in ${importsToLoad[name].filename} '${name}' is never exported`);
+        }
     }
 
     return result;

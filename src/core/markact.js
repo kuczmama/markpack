@@ -1,6 +1,6 @@
 // A better React and utils -- MarkAct.js
 
-function m(nodeName, attributes, ...args) {
+export function m(nodeName, attributes, ...args) {
     let children = args.length ? [].concat(...args) : null;
     return {
         nodeName,
@@ -9,7 +9,7 @@ function m(nodeName, attributes, ...args) {
     }
 }
 
-function render(vnode) {
+export function render(vnode) {
     if (vnode.split) return document.createTextNode(vnode);
     let n = document.createElement(vnode.nodeName);
     let as = vnode.attributes || {};
@@ -24,7 +24,7 @@ function render(vnode) {
     return n;
 }
 
-function renderAt(vnode, id) {
+export function renderAt(vnode, id) {
     let app = document.getElementById(id);
     if (app.firstChild) app.removeChild(app.firstChild);
     app.appendChild(render(vnode));
@@ -32,7 +32,7 @@ function renderAt(vnode, id) {
 
 
 
-function get(url, success) {
+export function get(url, success) {
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.onload = function() {

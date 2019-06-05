@@ -1,12 +1,40 @@
+function subtract() {
+    return {
+        type: "subtract"
+    }
+}
 function add() {
     return {
         type: "add"
     }
-}function subtract() {
-    return {
-        type: "subtract"
+}
+function withSequenced(dispatch) {
+    return (effect) => {
+        switch (effect.effectType) {
+            case 'sequenced':
+                for (let e of effect.effects) {
+                    if (!e) continue;
+                    effect$.dispatch(e);
+                }
+        }
     }
-}let reduceCounter = (state, action) => {
+}
+function sequence(first, next) {
+    if (!first) return next;
+    if (!next) return first;
+
+    if (first.effectType === "sequenced") {
+        return {...first,
+            effects: first.effects.concat([next])
+        }
+    }
+
+    return {
+        effectType: 'sequenced',
+        effects: [first, next]
+    };
+}
+const reduceCounter = (state, action) => {
     let effect = null;
     switch (action.type) {
         case "add":
@@ -27,42 +55,6 @@ function add() {
         effect: effect
     };
 };
-function m(nodeName, attributes, ...args) {
-    let children = args.length ? [].concat(...args) : null;
-    return {
-        nodeName,
-        attributes,
-        children
-    }
-}function render(vnode) {
-    if (vnode.split) return document.createTextNode(vnode);
-    let n = document.createElement(vnode.nodeName);
-    let as = vnode.attributes || {};
-    for (let k in as) {
-        if (typeof as[k] === "function") {
-            n[k] = as[k];
-        } else {
-            n.setAttribute(k, as[k]);
-        }
-    }
-    (vnode.children || []).map(c => n.appendChild(render(c)));
-    return n;
-}function renderAt(vnode, id) {
-    let app = document.getElementById(id);
-    if (app.firstChild) app.removeChild(app.firstChild);
-    app.appendChild(render(vnode));
-};function get(url, success) {
-    var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.onload = function() {
-        if (request.status === 0 || request.status >= 200 && request.status < 400) {
-            var resp = request.responseText;
-
-            success(resp);
-        }
-    };
-    request.send();
-}
 const initialState = {
     welcomeMessage: "Welcome to Mark Act!!",
     count: 0,
@@ -86,16 +78,16 @@ function RootPage(dispatch) {
     }
 }
 function getCoreServices() {
-    return [];
+    let services = [];
+    services.push(withSequenced);
+    return services;
 }
-function m(nodeName, attributes, ...args) {
-    let children = args.length ? [].concat(...args) : null;
-    return {
-        nodeName,
-        attributes,
-        children
-    }
-}function render(vnode) {
+function renderAt(vnode, id) {
+    let app = document.getElementById(id);
+    if (app.firstChild) app.removeChild(app.firstChild);
+    app.appendChild(render(vnode));
+}
+function render(vnode) {
     if (vnode.split) return document.createTextNode(vnode);
     let n = document.createElement(vnode.nodeName);
     let as = vnode.attributes || {};
@@ -108,36 +100,16 @@ function m(nodeName, attributes, ...args) {
     }
     (vnode.children || []).map(c => n.appendChild(render(c)));
     return n;
-}function renderAt(vnode, id) {
-    let app = document.getElementById(id);
-    if (app.firstChild) app.removeChild(app.firstChild);
-    app.appendChild(render(vnode));
-};function get(url, success) {
-    var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.onload = function() {
-        if (request.status === 0 || request.status >= 200 && request.status < 400) {
-            var resp = request.responseText;
-
-            success(resp);
-        }
-    };
-    request.send();
 }
-function sequence(first, next) {
-    if (!first) return next;
-    if (!next) return first;
-
-    if (first.effectType === "sequenced") {
-        return {...first,
-            effects: first.effects.concat([next])
-        };
-    }
+function m(nodeName, attributes, ...args) {
+    let children = args.length ? [].concat(...args) : null;
     return {
-        effectType: 'sequenced',
-        effects: [first, next]
-    };
-}function reducerChain(state, action, effect) {
+        nodeName,
+        attributes,
+        children
+    }
+}
+function reducerChain(state, action, effect) {
     const chainer = {
         apply: (reducer) => {
             let reduction = reducer(state, action);
@@ -163,29 +135,37 @@ const reduceInitialLoading = (state, action) => {
         effect: effect
     };
 };
-let self = null;class MarkactRoot {
-    constructor(id) {
-        self = this;
-        self.id = id;
-        self.state = {...initialState
-        };
-        self.services = getCoreServices(self.dispatch);
-        self.dispatch("init");
-    }
+
+;
 
 
-    reduce(state, action) {
+
+
+
+
+;
+
+
+const MarkactRoot = function(id) {
+    self = this;
+    self.id = id;
+    self.state = {...initialState
+    };
+    self.services = getCoreServices(self.dispatch);
+
+
+    self.reduce = function(state, action) {
         return reducerChain(state, action)
             .apply(reduceInitialLoading)
             .apply(reduceCounter)
             .result();
     };
 
-    reduceEffects(effects) {
+    self.reduceEffects = function(effects) {
         effects.map(effect => self.services.map(service => service(effect)))
     };
 
-    dispatch(action) {
+    self.dispatch = function(action) {
         console.log("action", action);
 
         console.log("self", self);
@@ -202,9 +182,10 @@ let self = null;class MarkactRoot {
         self.render();
     };
 
-    render() {
+    self.render = function() {
         let RootPageContent = RootPage(self.dispatch);
         renderAt(RootPageContent({...self.state
         }), self.id);
     }
+    self.dispatch("init");
 }
