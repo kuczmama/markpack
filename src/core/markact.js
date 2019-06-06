@@ -29,18 +29,3 @@ export function renderAt(vnode, id) {
     if (app.firstChild) app.removeChild(app.firstChild);
     app.appendChild(render(vnode));
 };
-
-
-
-export function get(url, success) {
-    var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.onload = function() {
-        if (request.status === 0 || request.status >= 200 && request.status < 400) {
-            var resp = request.responseText;
-
-            success(resp);
-        }
-    };
-    request.send();
-}
