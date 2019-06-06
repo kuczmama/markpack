@@ -25,7 +25,6 @@ window.MarkactRoot = function(id) {
     self.id = id;
     self.state = {...initialState
     };
-    self.services = getCoreServices(self.dispatch);
 
 
     self.reduce = function(state, action) {
@@ -46,7 +45,7 @@ window.MarkactRoot = function(id) {
         let oldState = {...self.state
         };
         let reduction = self.reduce(oldState, action);
-        if (reduction.effect) {
+        if (reduction.effects) {
             self.reduceEffects(reduction.effects);
         }
 
@@ -61,6 +60,8 @@ window.MarkactRoot = function(id) {
             console.warn("Slow action:  ", renderTime + "ms", action);
         }
     };
+    self.services = getCoreServices(self.dispatch);
+
 
     self.render = function() {
         let RootPageContent = RootPage(self.dispatch);
