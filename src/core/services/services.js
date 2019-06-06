@@ -1,9 +1,9 @@
 import {
-    withSequenced
-} from "./sequence-service.js";
+	withAjax
+} from "./ajax-service.js"
 
-export function getCoreServices() {
-    let services = [];
-    services.push(withSequenced);
-    return services;
+export function getCoreServices(dispatch) {
+	let services = [];
+	services.push(withAjax(dispatch));
+	return services;
 }
