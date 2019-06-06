@@ -40,11 +40,8 @@ window.MarkactRoot = function(id) {
     };
 
     self.dispatch = function(action) {
-
+        let startTimings = Date.now();
         console.log("action", action);
-
-        console.log("self", self);
-        console.log("state", self.state);
 
         let oldState = {...self.state
         };
@@ -54,7 +51,15 @@ window.MarkactRoot = function(id) {
         }
 
         self.state = reduction.state;
+        console.log("new state", self.state);
+        let startRenderTime = Date.now();
         self.render();
+        let renderTime = Date.now() - startRenderTime;
+        console.log("rendered in", renderTime, "ms");
+        console.log("completed in", Date.now() - startTimings, "ms");
+        if (renderTime > 50) {
+            console.warn("Slow action:  ", renderTime + "ms", action);
+        }
     };
 
     self.render = function() {
