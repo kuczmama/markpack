@@ -2,11 +2,11 @@ import {
     m,
     render,
     renderAt
-} from "../src/core/markact";
+} from "../core/markact.js";
 import {
     add,
     subtract,
-} from "../src/reducers/counter-reducer";
+} from "../reducers/counter-reducer.js";
 
 
 export function RootPage(dispatch) {

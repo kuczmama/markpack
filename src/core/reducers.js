@@ -1,6 +1,6 @@
 import {
     sequence
-} from "../src/core/services/sequence-service";
+} from "./services/sequence-service.js";
 
 export function reducerChain(state, action, effect) {
     const chainer = {

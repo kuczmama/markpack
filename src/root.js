@@ -1,10 +1,24 @@
-import {reduceCounter} from "./reducers/counter-reducer";
-import {reducerChain} from "./core/reducers";
-import {getCoreServices} from "./core/services/services";
-import {reduceInitialLoading} from "./reducers/initial-loading-reducer";
-import {RootPage} from "./views/root-page";
-import {renderAt} from "./core/markact";
-import {initialState} from "./state";
+import {
+    reduceCounter
+} from "./reducers/counter-reducer.js";
+import {
+    reducerChain
+} from "./core/reducers.js";
+import {
+    getCoreServices
+} from "./core/services/services.js";
+import {
+    reduceInitialLoading
+} from "./reducers/initial-loading-reducer.js";
+import {
+    RootPage
+} from "./views/root-page.js";
+import {
+    renderAt
+} from "./core/markact.js";
+import {
+    initialState
+} from "./state.js";
 
 window.MarkactRoot = function(id) {
     self = this;
@@ -26,6 +40,7 @@ window.MarkactRoot = function(id) {
     };
 
     self.dispatch = function(action) {
+
         console.log("action", action);
 
         console.log("self", self);

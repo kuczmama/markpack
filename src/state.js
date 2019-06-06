@@ -1,4 +1,4 @@
 export const initialState = {
-    welcomeMessage: "Welcome to Mark Act!! This is really cool fjlksdfjlkfsd",
+    welcomeMessage: "Welcome to Mark Act!!",
     count: 0,
 }

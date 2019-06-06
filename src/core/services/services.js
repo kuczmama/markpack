@@ -1,6 +1,6 @@
 import {
     withSequenced
-} from "sequence-service";
+} from "./sequence-service.js";
 
 export function getCoreServices() {
     let services = [];
