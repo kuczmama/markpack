@@ -16,12 +16,10 @@ import {
 import {
     renderAt
 } from "./core/markact.js";
-import {
-    initialState
-} from "./state.js";
+import { initialState } from "./state.js";
 
-window.MarkactRoot = function(id) {
-    self = this;
+(window as any).MarkactRoot = function(id: string) {
+    let self = this;
     self.id = id;
     self.state = {...initialState
     };
