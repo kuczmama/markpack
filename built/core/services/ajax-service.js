@@ -1,22 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function loadingRequest(name) {
+export function loadingRequest(name) {
     return {
         type: "loading-request",
         name: name,
     };
 }
-exports.loadingRequest = loadingRequest;
-function requestAjax(name, config) {
+export function requestAjax(name, config) {
     return {
         effectType: "request-ajax",
-        name: name,
-        config: config
+        name,
+        config
     };
 }
-exports.requestAjax = requestAjax;
-function completeRequest(requestEffect, status, response, headers, when) {
-    if (when === void 0) { when = Date.now(); }
+export function completeRequest(requestEffect, status, response, headers, when = Date.now()) {
     return {
         type: "complete-request",
         name: requestEffect.name,
@@ -24,84 +19,78 @@ function completeRequest(requestEffect, status, response, headers, when) {
         status: status,
         response: response,
         headers: headers,
-        when: when
+        when
     };
 }
-exports.completeRequest = completeRequest;
-function withAjax(dispatch, queueSize, rootUrl) {
-    if (queueSize === void 0) { queueSize = 6; }
-    if (rootUrl === void 0) { rootUrl = ""; }
-    return function (effect) {
-        var requests = {};
-        var canceled = false;
-        var xhrQueue = [];
-        var configsQueue = [];
-        var executingCount = 0;
-        var checkAndExecuteNext = function () {
+export function withAjax(dispatch, queueSize = 6, rootUrl = "") {
+    return (effect) => {
+        let requests = {};
+        let canceled = false;
+        let xhrQueue = [];
+        let configsQueue = [];
+        let executingCount = 0;
+        const checkAndExecuteNext = () => {
             if (canceled)
                 return;
             while (executingCount < queueSize && xhrQueue.length && configsQueue.length) {
-                var nextXhr = xhrQueue.shift();
-                var nextConfig = configsQueue.shift();
+                let nextXhr = xhrQueue.shift();
+                let nextConfig = configsQueue.shift();
                 executingCount++;
                 if (nextConfig && nextXhr) {
                     executeXhrWithConfig(nextConfig, nextXhr, rootUrl);
                 }
             }
         };
-        var normalizedName;
+        let normalizedName;
         switch (effect.effectType) {
             case "request-ajax":
                 normalizedName = effect.name.join("-");
                 dispatch(loadingRequest(effect.name));
-                var xhr_1 = requests[normalizedName] = new XMLHttpRequest();
-                var completeXhr_1 = function () {
+                let xhr = requests[normalizedName] = new XMLHttpRequest();
+                const completeXhr = () => {
                     executingCount--;
-                    if (requests[normalizedName] === xhr_1) {
+                    if (requests[normalizedName] === xhr) {
                         delete requests[normalizedName];
                     }
                     if (canceled)
                         return;
                     checkAndExecuteNext();
                 };
-                xhr_1.onerror = function () {
-                    completeXhr_1();
+                xhr.onerror = function () {
+                    completeXhr();
                     dispatch(completeRequest(effect, 0, "", ""));
                 };
-                xhr_1.onload = function () {
-                    completeXhr_1();
-                    dispatch(completeRequest(effect, xhr_1.status, xhr_1.responseText, xhr_1.getAllResponseHeaders()));
+                xhr.onload = function () {
+                    completeXhr();
+                    dispatch(completeRequest(effect, xhr.status, xhr.responseText, xhr.getAllResponseHeaders()));
                 };
-                xhr_1.ontimeout = function () {
-                    completeXhr_1();
+                xhr.ontimeout = function () {
+                    completeXhr();
                     dispatch(completeRequest(effect, 408, "", ""));
                 };
                 if (executingCount < queueSize) {
                     executingCount++;
-                    executeXhrWithConfig(effect.config, xhr_1, rootUrl);
+                    executeXhrWithConfig(effect.config, xhr, rootUrl);
                 }
                 else {
-                    xhrQueue.push(xhr_1);
+                    xhrQueue.push(xhr);
                     configsQueue.push(effect.config);
                 }
         }
     };
 }
-exports.withAjax = withAjax;
-function executeXhrWithConfig(config, xhr, rootUrl) {
-    if (rootUrl === void 0) { rootUrl = ""; }
+export function executeXhrWithConfig(config, xhr, rootUrl = "") {
     xhr.withCredentials = false;
     xhr.open(config.method, getAjaxUrl(config, rootUrl), true);
-    var headers = config.headers;
+    const headers = config.headers;
     if (headers) {
-        for (var key in headers) {
+        for (let key in headers) {
             xhr.setRequestHeader(key, headers[key]);
         }
     }
     xhr.send(getAjaxBody(config));
 }
-exports.executeXhrWithConfig = executeXhrWithConfig;
-function urlJoin(root, path) {
+export function urlJoin(root, path) {
     if (!root)
         return path;
     if (!path)
@@ -119,14 +108,12 @@ function urlJoin(root, path) {
         return root + path;
     }
 }
-exports.urlJoin = urlJoin;
-function getAjaxUrl(config, rootUrl) {
-    if (rootUrl === void 0) { rootUrl = ""; }
-    var url = urlJoin(rootUrl, config.url);
-    var query = config.query;
+export function getAjaxUrl(config, rootUrl = "") {
+    let url = urlJoin(rootUrl, config.url);
+    const query = config.query;
     if (query) {
-        var parts = [];
-        for (var key in query) {
+        let parts = [];
+        for (let key in query) {
             parts.push(encodeURIComponent(key) + "=" + encodeURIComponent(query[key]));
         }
         if (parts.length)
@@ -134,12 +121,10 @@ function getAjaxUrl(config, rootUrl) {
     }
     return url;
 }
-exports.getAjaxUrl = getAjaxUrl;
-function getAjaxBody(config) {
+export function getAjaxBody(config) {
     if (config.body)
         return config.body;
     if (config.json)
         return JSON.stringify(config.json);
     return null;
 }
-exports.getAjaxBody = getAjaxBody;

@@ -1,25 +1,18 @@
-"use strict";
 // A better React and utils -- MarkAct.js
-Object.defineProperty(exports, "__esModule", { value: true });
-function m(nodeName, attributes) {
-    var args = [];
-    for (var _i = 2; _i < arguments.length; _i++) {
-        args[_i - 2] = arguments[_i];
-    }
-    var children = args.length ? [].concat.apply([], args) : null;
+export function m(nodeName, attributes, ...args) {
+    let children = args.length ? [].concat(...args) : null;
     return {
-        nodeName: nodeName,
-        attributes: attributes,
-        children: children
+        nodeName,
+        attributes,
+        children
     };
 }
-exports.m = m;
-function render(vnode) {
-    if (vnode.split)
+export function render(vnode) {
+    if (typeof vnode === 'string')
         return document.createTextNode(vnode);
-    var n = document.createElement(vnode.nodeName);
-    var as = vnode.attributes || {};
-    for (var k in as) {
+    let n = document.createElement(vnode.nodeName);
+    let as = vnode.attributes || {};
+    for (let k in as) {
         if (typeof as[k] === "function") {
             n[k] = as[k];
         }
@@ -27,15 +20,12 @@ function render(vnode) {
             n.setAttribute(k, as[k]);
         }
     }
-    (vnode.children || []).map(function (c) { return n.appendChild(render(c)); });
+    (vnode.children || []).map(c => n.appendChild(render(c)));
     return n;
 }
-exports.render = render;
-function renderAt(vnode, id) {
-    var app = document.getElementById(id);
+export function renderAt(vnode, id) {
+    let app = document.getElementById(id);
     if (app.firstChild)
         app.removeChild(app.firstChild);
     app.appendChild(render(vnode));
 }
-exports.renderAt = renderAt;
-;

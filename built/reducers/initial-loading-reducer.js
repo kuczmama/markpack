@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.reduceInitialLoading = function (state, action) {
+export const reduceInitialLoading = (state, action) => {
     return {
-        state: state
+        state
     };
 };

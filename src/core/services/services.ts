@@ -1,6 +1,4 @@
-import {
-    withAjax
-} from "./ajax-service.js"
+import {withAjax} from "./ajax-service.js";
 import {withNavigation} from "./navigation-service.js";
 
 export function getCoreServices(dispatch) {

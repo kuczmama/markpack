@@ -26,12 +26,12 @@ export function linkClick(location) {
     }
 }
 
-export function inferBasePath() {
-    let tags = document.getElementsByTagName("BASE");
-    if (tags.length === 0) return "/";
+export function inferBasePath(): string {
+  let tags = document.getElementsByTagName("BASE");
+  if (tags.length === 0) return "/";
 
-    let parts = (tags[tags.length - 1]).href.split("/");
-    return "/" + parts.slice(3).join("/");
+  let parts = (tags[tags.length - 1] as HTMLBaseElement).href.split("/");
+  return "/" + parts.slice(3).join("/");
 }
 
 

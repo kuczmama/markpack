@@ -1,24 +1,37 @@
-import {requestAjax} from "../core/services/ajax-service.js";
+import {CompleteRequest, requestAjax} from "../core/services/ajax-service.js";
+import {ReductionWithEffect} from "../core/reducers.js";
+import {State} from "../state.js";
 
-export function add() {
+export type CounterAction = Add | Subtract;
+
+export interface Add {
+    type: "add"
+}
+
+export function add() : Add {
     return {
         type: "add"
     }
 }
 
-export function subtract() {
+export interface Subtract {
+  type: "subtract"
+}
+
+export function subtract() : Subtract {
     return {
         type: "subtract"
     }
 }
 
-export const reduceCounter = (state, action) => {
+export const reduceCounter = (state: State, action: CounterAction | CompleteRequest): ReductionWithEffect<State> => {
     let effects = [];
     switch (action.type) {
         case "complete-request":
             state = {...state};
             state.welcomeMessage = action.response;
             break;
+
         case "add":
             state = {...state};
             state.count++;

@@ -1,22 +1,10 @@
-import {
-    reduceCounter
-} from "./reducers/counter-reducer.js";
-import {
-    reducerChain
-} from "./core/reducers.js";
-import {
-    getCoreServices
-} from "./core/services/services.js";
-import {
-    reduceInitialLoading
-} from "./reducers/initial-loading-reducer.js";
-import {
-    RootPage
-} from "./views/root-page.js";
-import {
-    renderAt
-} from "./core/markact.js";
-import { initialState } from "./state.js";
+import {reduceCounter} from "./reducers/counter-reducer.js";
+import {reducerChain} from "./core/reducers.js";
+import {getCoreServices} from "./core/services/services.js";
+import {reduceInitialLoading} from "./reducers/initial-loading-reducer.js";
+import {RootPage} from "./views/root-page.js";
+import {renderAt} from "./core/markact.js";
+import {initialState, State} from "./state.js";
 
 (window as any).MarkactRoot = function(id: string) {
     let self = this;
@@ -25,7 +13,7 @@ import { initialState } from "./state.js";
     };
 
 
-    self.reduce = function(state, action) {
+    self.reduce = function(state: State, action) {
         return reducerChain(state, action)
             .apply(reduceInitialLoading)
             .apply(reduceCounter)

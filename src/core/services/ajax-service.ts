@@ -1,9 +1,30 @@
+export type AjaxAction = CompleteRequest;
 
-export function loadingRequest(name) {
-  return {
-    type: "loading-request",
-    name: name,
-  }
+export interface AjaxConfig {
+    url: string
+    method: "POST" | "GET" | "PUT" | "DELETE" | "PATCH"
+    json?: Object
+    query?: { [k: string]: string | number }
+    body?: string
+    headers?: { [k: string]: string }
+}
+
+export interface LoadingRequest {
+    type: "loading-request"
+    name: string[]
+}
+
+export function loadingRequest(name: string[]): LoadingRequest {
+    return {
+        type: "loading-request",
+        name: name,
+    }
+}
+
+export interface RequestAjax {
+    effectType: "request-ajax"
+    name: string[]
+    config: AjaxConfig
 }
 
 export function requestAjax(name, config) {
@@ -12,6 +33,15 @@ export function requestAjax(name, config) {
     name,
     config
   }
+}
+export interface CompleteRequest {
+  type: "complete-request"
+  name: string[]
+  success: boolean
+  status: number
+  response: string
+  headers: string
+  when: number
 }
 
 export function completeRequest(requestEffect,
