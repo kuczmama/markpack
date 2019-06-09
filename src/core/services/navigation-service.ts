@@ -1,28 +1,54 @@
-export function historyPush(location) {
+import {ReductionWithEffect} from "../reducers.js";
+import {State} from "../../state.js";
+
+export type NavigationAction = Visit | LinkClick
+
+export interface HistoryPush {
+  effectType: "history-push",
+  location: string
+}
+
+export function historyPush(location: string) : HistoryPush {
     return {
         effectType: "history-push",
-        location: location
+        location
     }
 }
 
-export function historyReplace(location) {
+export interface HistoryReplace {
+  effectType: "history-replace",
+  location: string
+}
+
+export function historyReplace(location: string) : HistoryReplace {
     return {
         effectType: "history-replace",
         location
     }
 }
 
-export function visit(location) {
+export interface Visit {
+  type: 'visit',
+  noHistory?: boolean,
+  location: Location
+}
+
+export function visit(location: Location) : Visit {
     return {
         type: "visit",
-        location: location
+        location
     };
 }
 
-export function linkClick(location) {
+export interface LinkClick {
+  type: 'link-click',
+  location: string
+}
+
+export function linkClick(location: string) : LinkClick {
     return {
         type: 'link-click',
-        location: location
+        location
     }
 }
 
@@ -56,13 +82,35 @@ export function visitDispatcher(dispatch) {
             pathname = "/" + pathname.slice(basePath.length);
         }
 
-        dispatch(linkClick({
-            pathname,
-            search,
-            hash
-        }));
+        let path = [pathname, search, hash].join("");
+        dispatch(linkClick(path));
         event.preventDefault();
     });
+}
+
+export function navigationReducer(route: (state: State, location: Location) => ReductionWithEffect<State>) {
+  return (state: State, action: NavigationAction): ReductionWithEffect<State> => {
+    if(state.initialLoad) {
+      route(state, window.location); // initial load
+    }
+    let effects = [];
+
+    switch (action.type) {
+      case 'visit':
+        let reduction = route(state, action.location);
+        if(reduction.effects) {
+          effects = effects.concat(reduction.effects);
+        }
+        state = reduction.state;
+        break;
+
+      case 'link-click':
+        effects = effects.concat(historyPush(action.location));
+        break;
+    }
+
+    return {state, effects};
+  }
 }
 
 export function withNavigation(dispatch) {
@@ -86,7 +134,7 @@ export function withNavigation(dispatch) {
 
     window.addEventListener('locationchange', function() {
         dispatch(visit(location));
-    })
+    });
 
     return (effect) => {
         switch (effect.effectType) {
